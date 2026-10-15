@@ -195,12 +195,9 @@ kbd {
   padding: 1px 6px; margin-right: 3px; color: var(--ink-2);
 }
 
-.foot {
-  padding: 18px 28px 24px; font-size: 11.5px; color: var(--ink-3); line-height: 1.5; text-align: center;
-}
 
 /* focus mode hides everything but the watch */
-body.focus .panel, body.focus .foot, body.focus .brand { display: none; }
+body.focus .panel, body.focus .brand { display: none; }
 body.focus .layout { grid-template-columns: 1fr; }
 body.focus .watch-svg { height: 88vh; }
 
