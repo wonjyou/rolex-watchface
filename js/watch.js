@@ -96,13 +96,6 @@
   function caseBody(metal, opts) {
     const m = METALS[metal];
     let s = '';
-    const lug = (sx, sg) => {
-      const X = (x) => r2(sx * x), Y = (y) => r2(sg * y);
-      return `<path d="M${X(158)} ${Y(118)}C${X(156)} ${Y(186)} ${X(145)} ${Y(226)} ${X(130)} ${Y(254)}Q${X(116)} ${Y(263)} ${X(100)} ${Y(254)}C${X(98)} ${Y(226)} ${X(99)} ${Y(200)} ${X(103)} ${Y(170)}Z" fill="url(#${metal}-lin)" stroke="${m.deep}" stroke-width="1.2"/>` +
-        `<path d="M${X(149)} ${Y(160)}C${X(147)} ${Y(200)} ${X(138)} ${Y(228)} ${X(125)} ${Y(249)}" fill="none" stroke="${m.hi}" stroke-width="2.6" opacity="${sx < 0 ? 0.85 : 0.55}"/>` +
-        `<path d="M${X(130)} ${Y(254)}Q${X(116)} ${Y(263)} ${X(100)} ${Y(254)}" fill="none" stroke="${m.deep}" stroke-width="1.6" opacity=".7"/>`;
-    };
-    s += lug(-1, -1) + lug(1, -1) + lug(-1, 1) + lug(1, 1);
     s += `<circle r="208" fill="url(#${metal}-rad)" stroke="${m.deep}" stroke-width="1.4"/>`;
     s += `<circle r="204" fill="none" stroke="${m.hi}" stroke-width="1" opacity=".5"/>`;
     return s;
@@ -522,7 +515,7 @@
         <feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
     </defs>`;
 
-    let out = `<svg class="watch-svg" viewBox="-262 -282 524 564" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${model.name} watch face showing the current local time">`;
+    let out = `<svg class="watch-svg" viewBox="-252 -252 504 504" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${model.name} watch face showing the current local time">`;
     out += defs;
 
 
