@@ -35,7 +35,6 @@
     h24Zone: 'local',
     bezel: {},            // modelId -> degrees
     chrono: { running: false, start: 0, acc: 0 },
-    lastBeat: -1,
     lastDateKey: '',
   };
 
@@ -98,12 +97,11 @@
       const k = el.dataset.hand;
       (refs.hands[k] = refs.hands[k] || []).push(el);
     });
-    state.lastBeat = -1;
     state.lastDateKey = '';
     applyBezel();
     wireWatch(svg);
     renderPanel();
-    tick(true);
+    tick();
     updateHash();
   }
 
@@ -121,15 +119,12 @@
     return c.running ? c.acc + (now - c.start) : c.acc;
   }
 
-  function tick(force) {
+  // Hands are positioned from the exact time on every call, so the seconds
+  // hand sweeps continuously instead of stepping.
+  function tick() {
     const now = new Date();
     const ms = now.getTime();
-    const beat = Math.floor(ms / 125); // 28,800 vph = 8 beats per second
-    if (!force && beat === state.lastBeat) return;
-    state.lastBeat = beat;
-
-    const msInSec = Math.floor(now.getMilliseconds() / 125) * 125;
-    const s = now.getSeconds() + msInSec / 1000;
+    const s = now.getSeconds() + now.getMilliseconds() / 1000;
     const mi = now.getMinutes() + s / 60;
     const h = (now.getHours() % 12) + mi / 60;
 
@@ -140,11 +135,15 @@
 
     const m = state.model;
     if (m.gmt || m.h24) {
-      const z = zoneParts(now, m.gmt ? state.gmtZone : state.h24Zone);
+      // time-zone lookup is costly, so refresh it once a second
+      const zone = m.gmt ? state.gmtZone : state.h24Zone;
+      const sec = Math.floor(ms / 1000);
+      if (!state.zone || state.zone.sec !== sec || state.zone.id !== zone) state.zone = { sec, id: zone, ...zoneParts(now, zone) };
+      const z = state.zone;
       setHand('gmt', (z.h + z.m / 60 + (s % 60) / 3600) * 15);
     }
     if (m.chrono) {
-      const e = Math.floor(chronoElapsed(ms) / 125) * 125;
+      const e = chronoElapsed(ms);
       setHand('chrono', ((e / 1000) % 60) * 6);
       setHand('sub-min', (Math.floor(e / 60000) % 30) * 12);
       setHand('sub-hr', ((e / 3600000) % 12) * 30);
@@ -165,8 +164,8 @@
   function fmtElapsed(e) {
     const t = Math.floor(e / 1000);
     const hh = Math.floor(t / 3600), mm = Math.floor((t % 3600) / 60), ss = t % 60;
-    const frac = Math.floor((e % 1000) / 125);
-    return `${hh}:${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}.${frac}/8`;
+    const tenths = Math.floor((e % 1000) / 100);
+    return `${hh}:${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}.${tenths}`;
   }
 
 
@@ -240,7 +239,7 @@
       if (c.running) return; // a real Daytona ignores reset while running
       c.acc = 0; click(1.4);
     }
-    tick(true);
+    tick();
     renderControls();
   }
 
@@ -323,7 +322,7 @@
   els.controls.addEventListener('change', (e) => {
     if (e.target.id === 'gmt-zone') state.gmtZone = e.target.value;
     if (e.target.id === 'h24-zone') state.h24Zone = e.target.value;
-    tick(true);
+    tick();
   });
   els.controls.addEventListener('click', (e) => {
     const b = e.target.closest('button');
@@ -384,8 +383,10 @@
   render();
   // Fonts load after first paint; re-render so text metrics are right.
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => render());
-  // A timer rather than requestAnimationFrame: embedded previews often pause
-  // rAF, and tick() only redraws when a new 1/8 s beat arrives anyway.
-  setInterval(() => tick(false), 25);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(true); });
+  // Redraw every display frame for a smooth sweep. Embedded previews can pause
+  // requestAnimationFrame, so a slower timer takes over whenever frames stop.
+  let lastFrame = 0;
+  (function frame() { lastFrame = performance.now(); tick(); requestAnimationFrame(frame); })();
+  setInterval(() => { if (performance.now() - lastFrame > 100) tick(); }, 40);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
 })();

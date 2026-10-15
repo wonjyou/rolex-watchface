@@ -34,7 +34,7 @@
       features: [
         'Date changes at local midnight under a 2.5x Cyclops lens',
         'Fluted bezel rendered facet by facet',
-        'Seconds hand steps 8 times per second (28,800 vph)',
+        'Seconds hand sweeps smoothly in real time',
         'Engraved rehaut and laser-etched crown at 6',
       ],
       variants: [

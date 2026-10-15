@@ -36,7 +36,7 @@ It also works as-is on GitHub Pages (Settings > Pages > deploy from the `main` b
 
 ## Details
 
-- The seconds hand ticks 8 times a second, the same 28,800 beats per hour as a Rolex movement.
+- The seconds hand sweeps smoothly in real time.
 - The date flips at local midnight under a Cyclops lens. The Day-Date spells out the day in the arc at 12.
 - The Submariner bezel only turns anticlockwise, in 120 clicks. Drag it, scroll over it, or use the buttons. It clicks.
 - The GMT-Master II has a 24-hour hand you can set to any time zone, and a bezel that turns both ways in 48 clicks.
