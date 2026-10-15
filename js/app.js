@@ -337,19 +337,17 @@
     state.night = on;
     document.body.classList.toggle('night', on);
     els.lumeBtn.setAttribute('aria-pressed', on);
-    els.lumeBtn.querySelector('.lbl').textContent = on ? 'Daylight' : 'Lume';
   }
   els.lumeBtn.addEventListener('click', () => setNight(!state.night));
 
-  // collapsible side panel, remembered per browser
+  // side menu: closed by default, remembered per browser
   function setPanel(open) {
     document.body.classList.toggle('panel-collapsed', !open);
     els.panelBtn.setAttribute('aria-expanded', open);
-    els.panelBtn.querySelector('.lbl').textContent = open ? 'Hide panel' : 'Show panel';
-    try { localStorage.setItem('panelOpen', open ? '1' : '0'); } catch (e) { /* storage unavailable */ }
+    try { localStorage.setItem('menuOpen', open ? '1' : '0'); } catch (e) { /* storage unavailable */ }
   }
   els.panelBtn.addEventListener('click', () => setPanel(document.body.classList.contains('panel-collapsed')));
-  try { if (localStorage.getItem('panelOpen') === '0') setPanel(false); } catch (e) { /* storage unavailable */ }
+  try { if (localStorage.getItem('menuOpen') === '1') setPanel(true); } catch (e) { /* storage unavailable */ }
 
   els.fsBtn.addEventListener('click', () => {
     if (document.fullscreenElement) document.exitFullscreen();
@@ -378,6 +376,9 @@
   }
   window.addEventListener('hashchange', () => { fromHash(); render(); });
 
+
+  // header crown mark
+  $('#brand-crown').innerHTML = `<svg viewBox="-14 -1 28 32" aria-hidden="true">${R.crownMark(0, 0, 28, 'currentColor')}</svg>`;
 
   fromHash();
   render();

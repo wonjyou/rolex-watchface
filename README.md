@@ -50,8 +50,8 @@ It also works as-is on GitHub Pages (Settings > Pages > deploy from the `main` b
 |---|---|
 | `←` `→` | Switch model |
 | `L` | Lume mode |
-| `P` | Show or hide the side panel |
-| `F` | Focus mode (watch only) |
+| `P` | Open or close the menu |
+| `F` | Focus mode, full screen with only the watch (also in the menu) |
 | `Space` | Start and stop the Daytona chronograph |
 
 The URL keeps your model and dial, so `index.html#gmt/pepsi` opens straight to the Pepsi.

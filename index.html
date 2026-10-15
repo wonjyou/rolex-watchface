@@ -11,19 +11,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600&family=EB+Garamond:wght@500;600;700;800&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="panel-collapsed">
   <header class="topbar">
+    <span id="brand-crown" class="brand-crown" role="img" aria-label="Rolex crown"></span>
     <div class="top-actions">
       <button id="lume-toggle" class="pill" aria-pressed="false" title="Toggle luminescence (L)">
         <span class="lume-dot"></span><span class="lbl">Lume</span>
       </button>
-      <button id="panel-toggle" class="pill" aria-expanded="true" aria-controls="panel" title="Show or hide the panel (P)">
-        <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M14.5 4.5v15" stroke="currentColor" stroke-width="1.6"/></svg>
-        <span class="lbl">Hide panel</span>
-      </button>
-      <button id="fs-toggle" class="pill" title="Full screen (F)">
-        <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
-        <span class="lbl">Focus</span>
+      <button id="panel-toggle" class="pill" aria-expanded="false" aria-controls="panel" title="Open or close the menu (P)">
+        <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span class="lbl">Menu</span>
       </button>
     </div>
   </header>
@@ -54,7 +51,18 @@
         <ul id="features" class="features"></ul>
       </div>
 
-      <p class="keys"><kbd>&larr;</kbd><kbd>&rarr;</kbd> switch model &nbsp; <kbd>L</kbd> lume &nbsp; <kbd>P</kbd> panel &nbsp; <kbd>F</kbd> focus</p>
+      <div class="block">
+        <h2 class="eyebrow">View</h2>
+        <div class="btn-row">
+          <button id="fs-toggle" class="btn" title="Full screen (F)">
+            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+            Focus mode
+          </button>
+        </div>
+        <p class="hint">Full screen with only the watch. Press Esc to leave.</p>
+      </div>
+
+      <p class="keys"><kbd>&larr;</kbd><kbd>&rarr;</kbd> switch model &nbsp; <kbd>L</kbd> lume &nbsp; <kbd>P</kbd> menu &nbsp; <kbd>F</kbd> focus</p>
     </aside>
   </main>
 
