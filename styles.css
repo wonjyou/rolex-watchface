@@ -35,13 +35,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 /* ---------- top bar ---------- */
 .topbar {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: center; justify-content: flex-end;
   padding: 18px 28px;
-}
-.brand { display: flex; align-items: center; gap: 12px; color: var(--gold-hi); }
-.brand-crown svg { width: 26px; height: 30px; display: block; }
-.brand-text {
-  font-family: var(--serif); font-size: 15px; letter-spacing: .32em; text-transform: uppercase; color: var(--ink);
 }
 .top-actions { display: flex; gap: 10px; }
 .pill {
@@ -200,7 +195,7 @@ body.panel-collapsed .watch-svg { height: min(calc(100vh - 110px), calc(100vw - 
 @media (min-width: 981px) { .panel > * { min-width: 380px; } }
 
 /* focus mode hides everything but the watch */
-body.focus .panel, body.focus .brand { display: none; }
+body.focus .panel { display: none; }
 body.focus .layout { grid-template-columns: 1fr; }
 body.focus .watch-svg { height: 88vh; }
 
@@ -213,7 +208,6 @@ body.focus .watch-svg { height: 88vh; }
   body.panel-collapsed .watch-svg { width: 100%; max-width: none; max-height: none; height: auto; }
   .watch-svg { height: auto; width: min(100%, 520px); max-height: 70vh; }
   .topbar { padding: 14px 16px; }
-  .brand-text { font-size: 12px; letter-spacing: .22em; }
   .models { grid-template-columns: repeat(2, 1fr); }
   .model-head h1 { font-size: 32px; }
 }

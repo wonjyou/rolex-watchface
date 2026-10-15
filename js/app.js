@@ -169,7 +169,6 @@
     return `${hh}:${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}.${frac}/8`;
   }
 
-  function loop() { tick(false); requestAnimationFrame(loop); }
 
   /* ---------- bezel ---------- */
   function applyBezel() {
@@ -379,12 +378,13 @@
   }
   window.addEventListener('hashchange', () => { fromHash(); render(); });
 
-  // header crown mark
-  $('#brand-crown').innerHTML = `<svg viewBox="-14 -1 28 32" aria-hidden="true">${R.crownMark(0, 0, 28, 'currentColor')}</svg>`;
 
   fromHash();
   render();
   // Fonts load after first paint; re-render so text metrics are right.
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => render());
-  requestAnimationFrame(loop);
+  // A timer rather than requestAnimationFrame: embedded previews often pause
+  // rAF, and tick() only redraws when a new 1/8 s beat arrives anyway.
+  setInterval(() => tick(false), 25);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(true); });
 })();
