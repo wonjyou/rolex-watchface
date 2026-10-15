@@ -348,7 +348,7 @@
       <rect x="-12.4" y="-9.4" width="24.8" height="18.8" fill="#fbfaf6"/>
       <g clip-path="url(#lensClip)">
         <rect x="-20" y="-16" width="40" height="32" fill="#fdfcf8"/>
-        <text id="date-text" class="datefont" x="0" y="1.5" font-size="27" fill="#101010">1</text>
+        <text id="date-text" class="datefont" x="0" y="-1.25" font-size="27" fill="#101010">1</text>
       </g>
     </g>`;
   }

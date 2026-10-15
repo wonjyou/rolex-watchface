@@ -88,7 +88,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .watch-svg .explorer-num { font-family: 'Barlow', var(--sans); font-weight: 600; }
 .watch-svg .subnum { font-family: 'Barlow', var(--sans); font-weight: 500; }
 .watch-svg .rehaut { font-family: var(--serif); font-weight: 600; letter-spacing: .9px; }
-.watch-svg .datefont { font-family: var(--serif); font-weight: 700; }
+.watch-svg .datefont { font-family: var(--serif); font-weight: 700; font-variant-numeric: lining-nums; }
 .watch-svg .datefont.day { font-weight: 700; }
 .sunburst { width: 100%; height: 100%; border-radius: 50%; }
 
