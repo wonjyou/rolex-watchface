@@ -48,9 +48,9 @@
     variants: $('#variants'),
     controls: $('#controls'),
     features: $('#features'),
-    readout: $('#readout'),
     lumeBtn: $('#lume-toggle'),
     fsBtn: $('#fs-toggle'),
+    panelBtn: $('#panel-toggle'),
   };
   let refs = {};
 
@@ -160,7 +160,6 @@
       if (refs.day) refs.day.textContent = DAYS[now.getDay()];
     }
 
-    if (beat % 8 === 0 || force) updateReadout(now);
   }
 
   function fmtElapsed(e) {
@@ -168,19 +167,6 @@
     const hh = Math.floor(t / 3600), mm = Math.floor((t % 3600) / 60), ss = t % 60;
     const frac = Math.floor((e % 1000) / 125);
     return `${hh}:${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}.${frac}/8`;
-  }
-
-  function updateReadout(now) {
-    const date = now.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-    const time = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    let extra = '';
-    const m = state.model;
-    if (m.gmt) {
-      const z = zoneParts(now, state.gmtZone);
-      const label = (ZONES.find((x) => x[0] === state.gmtZone) || [0, state.gmtZone])[1];
-      extra = `<span>GMT hand: ${label} ${String(z.h).padStart(2, '0')}:${String(z.m).padStart(2, '0')}</span>`;
-    }
-    els.readout.innerHTML = `<span>${date}</span><span class="dot"></span><span class="mono">${time}</span><span class="dot"></span><span>${LOCAL_TZ.replace(/_/g, ' ')}</span>${extra ? '<span class="dot"></span>' + extra : ''}`;
   }
 
   function loop() { tick(false); requestAnimationFrame(loop); }
@@ -338,7 +324,7 @@
   els.controls.addEventListener('change', (e) => {
     if (e.target.id === 'gmt-zone') state.gmtZone = e.target.value;
     if (e.target.id === 'h24-zone') state.h24Zone = e.target.value;
-    tick(true); updateReadout(new Date());
+    tick(true);
   });
   els.controls.addEventListener('click', (e) => {
     const b = e.target.closest('button');
@@ -356,6 +342,16 @@
   }
   els.lumeBtn.addEventListener('click', () => setNight(!state.night));
 
+  // collapsible side panel, remembered per browser
+  function setPanel(open) {
+    document.body.classList.toggle('panel-collapsed', !open);
+    els.panelBtn.setAttribute('aria-expanded', open);
+    els.panelBtn.querySelector('.lbl').textContent = open ? 'Hide panel' : 'Show panel';
+    try { localStorage.setItem('panelOpen', open ? '1' : '0'); } catch (e) { /* storage unavailable */ }
+  }
+  els.panelBtn.addEventListener('click', () => setPanel(document.body.classList.contains('panel-collapsed')));
+  try { if (localStorage.getItem('panelOpen') === '0') setPanel(false); } catch (e) { /* storage unavailable */ }
+
   els.fsBtn.addEventListener('click', () => {
     if (document.fullscreenElement) document.exitFullscreen();
     else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
@@ -369,6 +365,7 @@
     else if (e.key === 'ArrowLeft') selectModel(MODELS[(i - 1 + MODELS.length) % MODELS.length].id);
     else if (e.key.toLowerCase() === 'l') setNight(!state.night);
     else if (e.key.toLowerCase() === 'f') els.fsBtn.click();
+    else if (e.key.toLowerCase() === 'p') els.panelBtn.click();
     else if (e.key === ' ' && state.model.chrono) { e.preventDefault(); chronoAction('start'); }
   });
 

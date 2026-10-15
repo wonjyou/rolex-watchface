@@ -50,6 +50,7 @@ It also works as-is on GitHub Pages (Settings > Pages > deploy from the `main` b
 |---|---|
 | `←` `→` | Switch model |
 | `L` | Lume mode |
+| `P` | Show or hide the side panel |
 | `F` | Focus mode (watch only) |
 | `Space` | Start and stop the Daytona chronograph |
 
