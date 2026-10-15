@@ -34,6 +34,7 @@
     gmtZone: 'UTC',
     h24Zone: 'local',
     bezel: {},            // modelId -> degrees
+    chosen: {},           // modelId -> last chosen variant id
     chrono: { running: false, start: 0, acc: 0 },
     lastDateKey: '',
   };
@@ -85,6 +86,7 @@
     const m = state.model;
     els.stage.innerHTML = R.build(m, state.variant);
     els.stage.dataset.model = m.id;
+    state.chosen[m.id] = state.variant.id;
     const svg = $('svg', els.stage);
     refs = {
       svg,
@@ -246,9 +248,7 @@
   /* ---------- panel ---------- */
   function renderPanel() {
     const m = state.model;
-    els.models.innerHTML = MODELS.map((x) =>
-      `<button class="model-btn${x === m ? ' active' : ''}" data-id="${x.id}" aria-pressed="${x === m}">
-        <span class="mname">${x.name}</span><span class="mref">${x.ref.replace('Ref. ', '')}</span></button>`).join('');
+    updateCarousel();
     els.name.textContent = m.name;
     els.ref.textContent = `${m.ref} · ${m.since}`;
     els.blurb.textContent = m.blurb;
@@ -305,12 +305,82 @@
   function selectModel(id, variantId) {
     const m = MODELS.find((x) => x.id === id) || MODELS[0];
     state.model = m;
-    state.variant = m.variants.find((v) => v.id === variantId) || m.variants[0];
+    state.variant = m.variants.find((v) => v.id === (variantId || state.chosen[m.id])) || m.variants[0];
     render();
   }
 
+  /* ---------- model carousel ---------- */
+  // Thumbnails are the real renderer output posed at 10:10, turned into
+  // images so each one keeps its own gradient ids.
+  const THUMB_CSS = 'text{text-anchor:middle;dominant-baseline:central}' +
+    '.dialtxt,.roman,.rehaut,.datefont{font-family:"EB Garamond",Georgia,serif;font-weight:600}.datefont{font-weight:700}' +
+    '.bz,.explorer-num,.subnum{font-family:Barlow,"Helvetica Neue",Arial,sans-serif;font-weight:500}' +
+    '.sunburst{width:100%;height:100%;border-radius:50%}';
+  const POSE = { hour: 305, minute: 60, second: 186, gmt: 152.5, chrono: 0, 'sub-sec': 186, 'sub-min': 0, 'sub-hr': 0 };
+  const thumbCache = {};
+
+  function thumbURL(model, variant) {
+    const key = model.id + '/' + variant.id;
+    if (thumbCache[key]) return thumbCache[key];
+    const doc = new DOMParser().parseFromString(R.build(model, variant), 'image/svg+xml');
+    const svg = doc.documentElement;
+    svg.querySelectorAll('.night-dim, .lume-layer, .bezel-hit, .glare').forEach((n) => n.remove());
+    svg.querySelectorAll('[data-hand]').forEach((el) => {
+      const cx = el.getAttribute('data-cx'), cy = el.getAttribute('data-cy');
+      el.setAttribute('transform', (cx !== null ? `translate(${cx} ${cy}) ` : '') + `rotate(${POSE[el.getAttribute('data-hand')] || 0})`);
+    });
+    const now = new Date();
+    const date = svg.querySelector('#date-text'); if (date) date.textContent = now.getDate();
+    const day = svg.querySelector('#day-text'); if (day) day.textContent = DAYS[now.getDay()];
+    const style = doc.createElementNS('http://www.w3.org/2000/svg', 'style');
+    style.textContent = THUMB_CSS;
+    svg.insertBefore(style, svg.firstChild);
+    svg.setAttribute('width', '240'); svg.setAttribute('height', '240');
+    return (thumbCache[key] = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(svg)));
+  }
+
+  function variantOf(m) { return m.variants.find((v) => v.id === state.chosen[m.id]) || m.variants[0]; }
+
+  function buildCarousel() {
+    els.models.innerHTML = MODELS.map((x) =>
+      `<button class="model-card" data-id="${x.id}" aria-pressed="false" aria-label="${x.name}">
+        <span class="thumb"><img alt="" width="104" height="104" decoding="async"></span>
+        <span class="mname">${x.name}</span><span class="mref">${x.ref.replace('Ref. ', '')}</span></button>`).join('');
+  }
+
+  function updateCarousel() {
+    let active;
+    els.models.querySelectorAll('.model-card').forEach((card) => {
+      const m = MODELS.find((x) => x.id === card.dataset.id);
+      const on = m === state.model;
+      card.classList.toggle('active', on);
+      card.setAttribute('aria-pressed', on);
+      const img = card.querySelector('img');
+      const src = thumbURL(m, variantOf(m));
+      if (img.getAttribute('src') !== src) img.setAttribute('src', src);
+      if (on) active = card;
+    });
+    // keep the active card in view without scrolling the page itself
+    if (active) {
+      const t = els.models, left = active.offsetLeft - t.offsetLeft, right = left + active.offsetWidth;
+      if (left < t.scrollLeft || right > t.scrollLeft + t.clientWidth) t.scrollTo({ left: left - 8, behavior: 'smooth' });
+    }
+    updateArrows();
+  }
+
+  function updateArrows() {
+    const t = els.models;
+    document.querySelector('.arrow[data-dir="-1"]').disabled = t.scrollLeft <= 2;
+    document.querySelector('.arrow[data-dir="1"]').disabled = t.scrollLeft + t.clientWidth >= t.scrollWidth - 2;
+  }
+
+  buildCarousel();
+  els.models.addEventListener('scroll', updateArrows, { passive: true });
+  document.querySelectorAll('.carousel .arrow').forEach((a) => a.addEventListener('click', () => {
+    els.models.scrollBy({ left: +a.dataset.dir * els.models.clientWidth * 0.8, behavior: 'smooth' });
+  }));
   els.models.addEventListener('click', (e) => {
-    const b = e.target.closest('.model-btn');
+    const b = e.target.closest('.model-card');
     if (b) selectModel(b.dataset.id);
   });
   els.variants.addEventListener('click', (e) => {
@@ -348,13 +418,17 @@
   els.panelBtn.addEventListener('click', () => setPanel(document.body.classList.contains('panel-collapsed')));
   try { if (localStorage.getItem('menuOpen') === '1') setPanel(true); } catch (e) { /* storage unavailable */ }
 
+  // Embedded viewers often refuse full screen; fall back to an in-page focus mode.
   els.fsBtn.addEventListener('click', () => {
-    if (document.fullscreenElement) document.exitFullscreen();
-    else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+    if (document.fullscreenElement) { document.exitFullscreen().catch(() => {}); return; }
+    const el = document.documentElement;
+    if (!el.requestFullscreen) { document.body.classList.add('focus'); return; }
+    el.requestFullscreen().catch(() => document.body.classList.add('focus'));
   });
   document.addEventListener('fullscreenchange', () => document.body.classList.toggle('focus', !!document.fullscreenElement));
 
   document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !document.fullscreenElement) document.body.classList.remove('focus');
     if (e.target.matches('input, select, textarea')) return;
     const i = MODELS.indexOf(state.model);
     if (e.key === 'ArrowRight') selectModel(MODELS[(i + 1) % MODELS.length].id);

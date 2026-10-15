@@ -536,7 +536,7 @@
       if (bezelType === 'sub') insert = subInsert(v.insert, lumeBezel, lume);
       else if (bezelType === 'gmt') insert = gmtInsert(v.insert);
       else if (bezelType === 'tachy') insert = tachyInsert();
-      out += `<g id="bezel-rot" data-bezel>${bezelEdge(caseMetal, !!model.bezel.rotate)}${insert}</g>`;
+      out += `<g id="bezel-rot" data-bezel="1">${bezelEdge(caseMetal, !!model.bezel.rotate)}${insert}</g>`;
     }
 
     // 4. rehaut with engraving
@@ -546,7 +546,7 @@
       const a = i * 30 + 15;
       out += `<text class="rehaut" transform="rotate(${a}) translate(0 ${-(161.5 + rehautR) / 2})" font-size="5.4" fill="${mix(dial.edge, '#ffffff', 0.55)}" opacity=".7">ROLEX</text>`;
     }
-    out += `<g opacity=".7">${crownMark(0, 162.6, 6, mix(dial.edge, '#ffffff', 0.55)).replace('<g ', '<g data-x ')}</g>`;
+    out += `<g opacity=".7">${crownMark(0, 162.6, 6, mix(dial.edge, '#ffffff', 0.55))}</g>`;
 
     // 5. dial
     out += `<g clip-path="url(#dialClip)"><clipPath id="dialClip"><circle r="161.5"/></clipPath>`;
@@ -590,7 +590,7 @@
     out += `<g class="night-dim">${silhouette.replace(/class="pusher[^"]*"/g, '')}</g>`;
     out += `<g class="lume-layer" filter="url(#lumeGlow)">`;
     out += lumeStatic.join('');
-    if (lumeBezel.length) out += `<g data-bezel>${lumeBezel.join('')}</g>`;
+    if (lumeBezel.length) out += `<g data-bezel="1">${lumeBezel.join('')}</g>`;
     order.forEach((k) => { if (H[k]) out += handLumeGroup(k, H[k]); });
     if (!model.chrono) out += handLumeGroup('second', H.second);
     out += `</g>`;

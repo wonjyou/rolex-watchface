@@ -36,6 +36,7 @@ It also works as-is on GitHub Pages (Settings > Pages > deploy from the `main` b
 
 ## Details
 
+- Open the menu to pick a model from a carousel of thumbnails. Each thumbnail shows the dial you last chose for that model.
 - The seconds hand sweeps smoothly in real time.
 - The date flips at local midnight under a Cyclops lens. The Day-Date spells out the day in the arc at 12.
 - The Submariner bezel only turns anticlockwise, in 120 clicks. Drag it, scroll over it, or use the buttons. It clicks.
@@ -64,7 +65,7 @@ styles.css        styling, lume mode, mobile layout
 js/models.js      models and dials: colours, text layout, features
 js/watch.js       draws the watch as SVG
 js/app.js         keeps time, handles clicks and drags, runs the side panel
-assets/           Rolex wordmark and crown
+assets/           Rolex wordmark, crown and self-hosted fonts
 docs/             screenshots for this README
 ```
 
