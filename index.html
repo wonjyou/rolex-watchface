@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Oyster Dial Study</title>
+  <meta name="description" content="A digital study of classic Rolex Oyster Perpetual watch faces, set to your local time and date.">
+  <link rel="icon" href="assets/rolex-crown.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@500;600&family=EB+Garamond:wght@500;600;700;800&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span id="brand-crown" class="brand-crown"></span>
+      <span class="brand-text">Oyster Dial Study</span>
+    </div>
+    <div class="top-actions">
+      <button id="lume-toggle" class="pill" aria-pressed="false" title="Toggle luminescence (L)">
+        <span class="lume-dot"></span><span class="lbl">Lume</span>
+      </button>
+      <button id="fs-toggle" class="pill" title="Full screen (F)">
+        <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span class="lbl">Focus</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="stage" aria-live="off">
+      <div id="watch" class="watch"></div>
+      <div id="readout" class="readout"></div>
+    </section>
+
+    <aside class="panel">
+      <nav id="models" class="models" aria-label="Choose a model"></nav>
+
+      <div class="model-head">
+        <p id="model-ref" class="eyebrow"></p>
+        <h1 id="model-name"></h1>
+        <p id="model-blurb" class="blurb"></p>
+      </div>
+
+      <div class="block">
+        <h2 class="eyebrow">Dial</h2>
+        <div id="variants" class="swatches"></div>
+      </div>
+
+      <div id="controls" class="block controls"></div>
+
+      <div class="block">
+        <h2 class="eyebrow">Details reproduced</h2>
+        <ul id="features" class="features"></ul>
+      </div>
+
+      <p class="keys"><kbd>&larr;</kbd><kbd>&rarr;</kbd> switch model &nbsp; <kbd>L</kbd> lume &nbsp; <kbd>F</kbd> focus</p>
+    </aside>
+  </main>
+
+  <footer class="foot">
+    Fan-made study for personal, non-commercial use. Rolex, the crown device, Oyster Perpetual and all model names are trademarks of Rolex SA. Not affiliated with or endorsed by Rolex.
+  </footer>
+
+  <script src="js/models.js"></script>
+  <script src="js/watch.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
