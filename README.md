@@ -53,7 +53,7 @@ It also works as-is on GitHub Pages (Settings > Pages > deploy from the `main` b
 | `←` `→` | Switch model |
 | `L` | Lume mode |
 | `P` | Open or close the menu |
-| `F` | Focus mode, full screen with only the watch (also in the menu) |
+| `F` | Focus mode, full screen with only the watch (also in the menu). The Menu button becomes Exit focus, and Esc also leaves |
 | `Space` | Start and stop the Daytona chronograph |
 
 The URL keeps your model and dial, so `index.html#gmt/pepsi` opens straight to the Pepsi.

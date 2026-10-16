@@ -466,20 +466,34 @@
     els.panelBtn.setAttribute('aria-expanded', open);
     try { localStorage.setItem('menuOpen', open ? '1' : '0'); } catch (e) { /* storage unavailable */ }
   }
-  els.panelBtn.addEventListener('click', () => setPanel(document.body.classList.contains('panel-collapsed')));
+  els.panelBtn.addEventListener('click', () => {
+    if (document.body.classList.contains('focus')) { exitFocus(); return; } // button reads "Exit focus" here
+    setPanel(document.body.classList.contains('panel-collapsed'));
+  });
   try { if (localStorage.getItem('menuOpen') === '1') setPanel(true); } catch (e) { /* storage unavailable */ }
 
+  // Focus mode hides the menu, so the Menu button becomes an exit button while it's on.
   // Embedded viewers often refuse full screen; fall back to an in-page focus mode.
+  function setFocus(on) {
+    document.body.classList.toggle('focus', on);
+    els.panelBtn.querySelector('.lbl').textContent = on ? 'Exit focus' : 'Menu';
+    els.panelBtn.title = on ? 'Leave focus mode (Esc)' : 'Open or close the menu (P)';
+    els.panelBtn.setAttribute('aria-expanded', on ? 'false' : String(!document.body.classList.contains('panel-collapsed')));
+  }
+  function exitFocus() {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    setFocus(false);
+  }
   els.fsBtn.addEventListener('click', () => {
-    if (document.fullscreenElement) { document.exitFullscreen().catch(() => {}); return; }
+    if (document.body.classList.contains('focus')) { exitFocus(); return; }
     const el = document.documentElement;
-    if (!el.requestFullscreen) { document.body.classList.add('focus'); return; }
-    el.requestFullscreen().catch(() => document.body.classList.add('focus'));
+    if (!el.requestFullscreen) { setFocus(true); return; }
+    el.requestFullscreen().then(() => setFocus(true), () => setFocus(true));
   });
-  document.addEventListener('fullscreenchange', () => document.body.classList.toggle('focus', !!document.fullscreenElement));
+  document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) setFocus(false); });
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !document.fullscreenElement) document.body.classList.remove('focus');
+    if (e.key === 'Escape' && !document.fullscreenElement && document.body.classList.contains('focus')) exitFocus();
     if (e.target.matches('input, select, textarea')) return;
     const i = MODELS.indexOf(state.model);
     if (e.key === 'ArrowRight') { selectModel(MODELS[(i + 1) % MODELS.length].id); showDock(); }

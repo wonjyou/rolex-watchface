@@ -84,9 +84,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .pill[aria-expanded="true"], .pill[aria-expanded="true"]:hover { border-color: var(--gold); background: rgba(165, 133, 63, .14); }
 /* hamburger morphs into an X while the menu is open */
 .menu-icon path { transform-box: view-box; transform-origin: 12px 12px; transition: transform .3s ease, opacity .2s ease; }
-.pill[aria-expanded="true"] .menu-icon .l1 { transform: rotate(45deg) translateY(5px); }
-.pill[aria-expanded="true"] .menu-icon .l2 { opacity: 0; }
-.pill[aria-expanded="true"] .menu-icon .l3 { transform: rotate(-45deg) translateY(-5px); }
+.pill[aria-expanded="true"] .menu-icon .l1, body.focus .menu-icon .l1 { transform: rotate(45deg) translateY(5px); }
+.pill[aria-expanded="true"] .menu-icon .l2, body.focus .menu-icon .l2 { opacity: 0; }
+.pill[aria-expanded="true"] .menu-icon .l3, body.focus .menu-icon .l3 { transform: rotate(-45deg) translateY(-5px); }
 .pill:hover { background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .2); }
 .lume-dot { width: 9px; height: 9px; border-radius: 50%; background: #d9d6c9; transition: all .4s; }
 .pill[aria-pressed="true"] { border-color: rgba(143, 220, 255, .5); }
