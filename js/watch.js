@@ -101,32 +101,67 @@
     return s;
   }
 
-  function crownAssembly(metal, guards) {
+  // A knurled cylinder seen side-on, axis along +x from x0 to x1, radius R.
+  // Each flute is its own shaded band, so the grip reads as deep ridges and the
+  // silhouette edges come out toothed, like a real screw-down crown.
+  function knurl(x0, x1, R, metal, flutes) {
     const m = METALS[metal];
-    let s = '';
-    if (guards) {
-      s += `<path d="M196 -50C216 -48 228 -36 227 -22L227 22C228 36 216 48 196 50Z" fill="url(#${metal}-v)" stroke="${m.deep}" stroke-width="1.2"/>`;
+    let s = `<rect x="${x0}" y="${r2(-R * 0.94)}" width="${r2(x1 - x0)}" height="${r2(R * 1.88)}" rx="1.5" fill="${m.deep}"/>`;
+    for (let i = 0; i < flutes; i++) {
+      const t0 = -90 + (i * 180) / flutes, t1 = t0 + 180 / flutes, tm = (t0 + t1) / 2;
+      const y0 = R * Math.sin(rad(t0)), y1 = R * Math.sin(rad(t1));
+      const ya = y0 + (y1 - y0) * 0.18, yb = y1 - (y1 - y0) * 0.18, hgt = yb - ya;
+      const rx = r2(Math.min(1.4, hgt / 2)), w = r2(x1 - x0);
+      // ridges facing the viewer are brightest; the lower half falls into shade
+      const shade = r2(Math.min(0.8, (1 - Math.cos(rad(tm))) * 0.6 + (tm > 0 ? 0.22 : 0)));
+      s += `<rect x="${x0}" y="${r2(ya)}" width="${w}" height="${r2(hgt)}" rx="${rx}" fill="url(#${metal}-v)"/>`;
+      if (shade > 0.02) s += `<rect x="${x0}" y="${r2(ya)}" width="${w}" height="${r2(hgt)}" rx="${rx}" fill="#000" opacity="${shade}"/>`;
+      // polished edge catching the light
+      if (hgt > 2.5) s += `<rect x="${x0 + 0.5}" y="${r2(ya + hgt * 0.12)}" width="${r2(x1 - x0 - 1)}" height="${r2(Math.max(0.6, hgt * 0.16))}" fill="${m.hi}" opacity="${r2(0.85 - shade)}"/>`;
     }
-    const x0 = guards ? 216 : 205, w = 27, h = 46;
-    s += `<rect x="${x0 - 8}" y="-12" width="12" height="24" fill="url(#${metal}-v)" stroke="${m.deep}" stroke-width=".8"/>`;
-    s += `<rect x="${x0}" y="${-h / 2}" width="${w}" height="${h}" rx="5" fill="url(#${metal}-v)" stroke="${m.deep}" stroke-width="1.1"/>`;
-    // knurled grip: ridges run along the crown axis, bunching toward the edges
-    for (let i = 1; i < 18; i++) {
-      const y = r2((h / 2 - 2) * Math.sin(-Math.PI / 2 + (Math.PI * i) / 18));
-      s += `<line x1="${x0 + 4}" x2="${x0 + w - 2}" y1="${y}" y2="${y}" stroke="${i % 2 ? m.deep : m.hi}" stroke-width=".7" opacity=".55"/>`;
-    }
-    s += `<rect x="${x0 + w - 4}" y="${-h / 2 + 2}" width="4" height="${h - 4}" rx="2" fill="${m.lo}" opacity=".7"/>`;
     return s;
   }
 
+  // A smooth cylinder (tube, collar or button) seen side-on, with a rounded outer end.
+  function smoothCyl(x0, x1, R, metal, rx = 2) {
+    const m = METALS[metal];
+    return `<rect x="${x0}" y="${-R}" width="${r2(x1 - x0)}" height="${2 * R}" rx="${rx}" fill="url(#${metal}-v)" stroke="${m.deep}" stroke-width=".8"/>`;
+  }
+
+  function crownAssembly(metal, guards, faceted) {
+    const m = METALS[metal];
+    let s = '';
+    if (faceted) {
+      // Daytona: an angular shoulder that swells out of the case around the crown
+      s += `<path d="M176 -110L214 -74L231 -44L231 44L214 74L176 110Z" fill="url(#${metal}-h)" stroke="${m.deep}" stroke-width="1.2"/>`;
+      s += `<path d="M178 -106L213 -73L229 -44" fill="none" stroke="${m.hi}" stroke-width="2.2" opacity=".85"/>`;
+      s += `<path d="M229 44L213 73L178 106" fill="none" stroke="${m.deep}" stroke-width="2" opacity=".5"/>`;
+    } else if (guards) {
+      s += `<path d="M194 -58C218 -56 230 -42 229 -26L229 26C230 42 218 56 194 58Z" fill="url(#${metal}-v)" stroke="${m.deep}" stroke-width="1.2"/>`;
+    }
+    const R = guards ? 34 : 27;
+    const x0 = faceted ? 229 : guards ? 221 : 207, len = guards ? 28 : 24;
+    s += smoothCyl(x0 - (guards ? 3 : 12), x0 + 1, R * 0.5, metal, 1); // tube into the case
+    s += smoothCyl(x0, x0 + 4, R * 0.9, metal, 1.5);                // collar
+    s += knurl(x0 + 3, x0 + len, R, metal, guards ? 7 : 9);         // fluted grip
+    s += `<rect x="${x0 + len - 1}" y="${r2(-R * 0.8)}" width="6" height="${r2(R * 1.6)}" rx="3" fill="url(#${metal}-v)" stroke="${m.deep}" stroke-width=".8"/>`; // domed end
+    return s;
+  }
+
+  // Daytona screw-down pushers: a knurled collar with a smaller round button.
+  // Drawn along +x and rotated so each points radially out at its angle.
   function pushers(metal) {
     const m = METALS[metal];
-    return [[58, 'start'], [122, 'reset']].map(([a, act]) =>
-      `<g class="pusher" data-action="${act}" transform="rotate(${a})">
-        <rect x="-15" y="-238" width="30" height="34" fill="transparent"/>
-        <rect x="-11" y="-226" width="22" height="22" rx="2" fill="url(#${metal}-h)" stroke="${m.deep}" stroke-width="1"/>
-        ${[...Array(7)].map((_, i) => `<line x1="${-9 + i * 3}" x2="${-9 + i * 3}" y1="-224" y2="-206" stroke="${m.deep}" stroke-width=".6" opacity=".5"/>`).join('')}
-        <rect class="pusher-btn" x="-7.5" y="-238" width="15" height="13" rx="3" fill="url(#${metal}-h)" stroke="${m.deep}" stroke-width="1"/>
+    return [[54, 'start'], [126, 'reset']].map(([a, act]) =>
+      `<g class="pusher" data-action="${act}" transform="rotate(${a - 90})">
+        <rect x="196" y="-26" width="60" height="52" fill="transparent"/>
+        ${smoothCyl(194, 207, 10, metal, 1)}
+        ${knurl(205, 228, 22, metal, 7)}
+        <g class="pusher-btn">
+          ${smoothCyl(227, 243, 13, metal, 5)}
+          <line x1="231" x2="231" y1="-12.5" y2="12.5" stroke="${m.deep}" stroke-width="1" opacity=".6"/>
+          <line x1="235" x2="235" y1="-12.5" y2="12.5" stroke="${m.deep}" stroke-width="1" opacity=".6"/>
+        </g>
       </g>`).join('');
   }
 
@@ -515,14 +550,14 @@
         <feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
     </defs>`;
 
-    let out = `<svg class="watch-svg" viewBox="-252 -252 504 504" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${model.name} watch face showing the current local time">`;
+    let out = `<svg class="watch-svg" viewBox="-266 -266 532 532" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${model.name} watch face showing the current local time">`;
     out += defs;
 
 
     // 2. case + crown + pushers
     out += `<g filter="url(#caseShadow)">`;
     if (model.pushers) out += pushers(caseMetal);
-    out += crownAssembly(caseMetal, model.guards);
+    out += crownAssembly(caseMetal, model.guards, model.pushers);
     out += caseBody(caseMetal, {});
     out += `</g>`;
 
@@ -586,7 +621,7 @@
 
     // 7. night: dim everything, then re-draw luminescent parts glowing
     // dim layer follows the watch silhouette so the page background is untouched
-    const silhouette = (model.pushers ? pushers(caseMetal) : '') + crownAssembly(caseMetal, model.guards) + caseBody(caseMetal, {});
+    const silhouette = (model.pushers ? pushers(caseMetal) : '') + crownAssembly(caseMetal, model.guards, model.pushers) + caseBody(caseMetal, {});
     out += `<g class="night-dim">${silhouette.replace(/class="pusher[^"]*"/g, '')}</g>`;
     out += `<g class="lume-layer" filter="url(#lumeGlow)">`;
     out += lumeStatic.join('');
