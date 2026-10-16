@@ -404,9 +404,21 @@
     const m = METALS[metal];
     return `<path d="${sector(114.5, 140.5, -26.5, 26.5)}" fill="url(#${metal}-lin)" stroke="${m.deep}" stroke-width=".6"/>
       <path d="${sector(116.5, 138.5, -25, 25)}" fill="#fbfaf6"/>
-      <path id="dayArc" d="${arcPath(127.5, -40, 40)}" fill="none"/>
-      <text class="datefont day" font-size="10.4" fill="#111" letter-spacing=".6"><textPath id="day-text" href="#dayArc" startOffset="50%" text-anchor="middle" dominant-baseline="central">MONDAY</textPath></text>`;
+      <clipPath id="dayLensClip"><path d="${sector(DAY_LENS.rIn, DAY_LENS.rOut, -DAY_LENS.a, DAY_LENS.a)}"/></clipPath>
+      <g clip-path="url(#dayLensClip)">
+        <path d="${sector(DAY_LENS.rIn - 4, DAY_LENS.rOut + 4, -DAY_LENS.a - 3, DAY_LENS.a + 3)}" fill="#fdfcf8"/>
+        <path id="dayArc" d="${arcPath(127.5, -40, 40)}" fill="none"/>
+        <text class="datefont day" font-size="15" fill="#111" letter-spacing=".5"><textPath id="day-text" href="#dayArc" startOffset="50%" text-anchor="middle" dominant-baseline="central">MONDAY</textPath></text>
+      </g>`;
   }
+  // Curved glass lens over the day window, styled like the Cyclops over the date.
+  // The day name under it is drawn larger, as if magnified.
+  const DAY_LENS = { rIn: 112.5, rOut: 142.5, a: 27.4 };
+  const dayLens = () => `<g class="day-lens">
+      <path d="${sector(DAY_LENS.rIn, DAY_LENS.rOut, -DAY_LENS.a, DAY_LENS.a)}" fill="url(#lensGrad)" stroke="rgba(255,255,255,.55)" stroke-width=".8"/>
+      <path d="${sector(DAY_LENS.rIn + 1.6, DAY_LENS.rOut - 1.6, -DAY_LENS.a + 1.3, DAY_LENS.a - 1.3)}" fill="none" stroke="rgba(0,0,0,.18)" stroke-width="1"/>
+      <path d="${arcPath(DAY_LENS.rOut - 3, -DAY_LENS.a + 4, DAY_LENS.a - 4)}" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1.1" stroke-linecap="round"/>
+    </g>`;
 
   function subdials(v) {
     const sd = v.sub;
@@ -639,6 +651,7 @@
 
     // 8. crystal: cyclops + glare + laser-etched crown at six
     if (model.date) out += cyclops();
+    if (model.day) out += dayLens();
     out += `<circle class="glare" r="170" fill="url(#glare)" pointer-events="none"/>`;
     out += `<g opacity=".16" pointer-events="none">${crownMark(0, 140.5, 5.4, '#ffffff')}</g>`;
 
