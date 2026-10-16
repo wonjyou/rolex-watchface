@@ -36,7 +36,8 @@ It also works as-is on GitHub Pages (Settings > Pages > deploy from the `main` b
 
 ## Details
 
-- Open the menu to pick a model from a carousel of thumbnails. Each thumbnail shows the dial you last chose for that model.
+- Pick a model from the row of mini watch faces under the watch. Hover one to enlarge it and see its name. Each mini face shows the dial you last chose for that model.
+- Switching models fades the old watch out and the new one in, with its hands sweeping round to the current time.
 - The seconds hand sweeps smoothly in real time.
 - The date flips at local midnight under a Cyclops lens. The Day-Date spells out the day in the arc at 12.
 - The Submariner bezel only turns anticlockwise, in 120 clicks. Drag it, scroll over it, or use the buttons. It clicks.

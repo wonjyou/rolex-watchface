@@ -25,20 +25,14 @@
   <main class="layout">
     <section class="stage" aria-live="off">
       <div id="watch" class="watch"></div>
+      <nav class="carousel" aria-label="Choose a model">
+        <button class="arrow" data-dir="-1" aria-label="Previous models"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <div id="models" class="carousel-track"></div>
+        <button class="arrow" data-dir="1" aria-label="Next models"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </nav>
     </section>
 
     <aside id="panel" class="panel">
-      <section class="carousel" aria-label="Choose a model">
-        <div class="carousel-head">
-          <h2 class="eyebrow">Collection</h2>
-          <div class="carousel-nav">
-            <button class="arrow" data-dir="-1" aria-label="Previous models"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-            <button class="arrow" data-dir="1" aria-label="Next models"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          </div>
-        </div>
-        <div id="models" class="carousel-track"></div>
-      </section>
-
       <div class="model-head">
         <p id="model-ref" class="eyebrow"></p>
         <h1 id="model-name"></h1>

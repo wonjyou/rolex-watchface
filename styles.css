@@ -105,12 +105,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .stage {
   position: sticky; top: 0;
   display: flex; flex-direction: column; align-items: center;
-  min-height: calc(100vh - 140px);
+  min-height: calc(100vh - 80px);
   justify-content: center;
 }
 .watch { width: 100%; display: flex; justify-content: center; }
 .watch-svg {
-  height: min(78vh, 760px);
+  height: min(calc(100vh - 220px), 740px);
   width: auto;
   transition: height .45s ease;
   max-width: 100%;
@@ -161,35 +161,52 @@ body.night .watch-svg .glare { opacity: .3; }
   padding: 4px 0 28px;
   display: flex; flex-direction: column; gap: 26px;
 }
-.carousel { display: flex; flex-direction: column; gap: 12px; }
-.carousel-head { display: flex; align-items: center; justify-content: space-between; }
-.carousel-nav { display: flex; gap: 6px; }
+/* model carousel: mini watch faces under the main watch */
+.carousel { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; max-width: 760px; margin-top: 4px; }
 .arrow {
-  width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  flex: none; width: 30px; height: 30px; border-radius: 50%; display: none; place-items: center;
   background: rgba(255, 255, 255, .04); border: 1px solid var(--line); transition: background .2s, opacity .2s;
 }
+.carousel.overflowing .arrow { display: grid; }
 .arrow:hover:not(:disabled) { background: rgba(255, 255, 255, .1); }
 .arrow:disabled { opacity: .3; cursor: default; }
 .carousel-track {
-  display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory;
-  scrollbar-width: none; padding-bottom: 2px; overscroll-behavior-x: contain;
+  display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x proximity; min-width: 0;
+  /* room above for the enlarged face and below for its name */
+  padding: 22px 34px 30px; scrollbar-width: none; overscroll-behavior-x: contain;
 }
 .carousel-track::-webkit-scrollbar { display: none; }
+.carousel-track > :first-child { margin-left: auto; }
+.carousel-track > :last-child { margin-right: auto; }
 .model-card {
-  flex: 0 0 132px; scroll-snap-align: start;
-  display: flex; flex-direction: column; align-items: center; gap: 3px;
-  padding: 12px 8px 12px; text-align: center;
-  background: rgba(255, 255, 255, .025); border: 1px solid var(--line); border-radius: 14px;
-  transition: border-color .2s, background .2s;
+  position: relative; flex: none; scroll-snap-align: center;
+  background: none; border: 0; padding: 0; border-radius: 50%;
 }
-.model-card:hover { background: rgba(255, 255, 255, .06); }
-.model-card.active { border-color: var(--gold); background: rgba(165, 133, 63, .12); }
-.model-card .thumb { display: block; margin-bottom: 6px; }
-.model-card img { width: 104px; height: 104px; display: block; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .5)); transition: transform .3s ease; }
-.model-card:hover img { transform: scale(1.04); }
-.model-card .mname { font-size: 14.5px; line-height: 1.2; }
+.model-card img {
+  width: 64px; height: 64px; display: block;
+  filter: drop-shadow(0 5px 8px rgba(0, 0, 0, .55));
+  transform-origin: 50% 70%; transition: transform .28s cubic-bezier(.2, .8, .2, 1), opacity .2s;
+  opacity: .78;
+}
+.model-card:hover img, .model-card:focus-visible img { transform: scale(1.38); opacity: 1; }
+.model-card.active img { opacity: 1; }
+.model-card:focus-visible { outline: none; }
+/* gold dot marks the watch on display */
+.model-card::after {
+  content: ''; position: absolute; left: 50%; bottom: -9px; width: 4px; height: 4px; margin-left: -2px;
+  border-radius: 50%; background: var(--gold-hi); opacity: 0; transition: opacity .2s;
+}
+.model-card.active::after { opacity: 1; }
+.model-card .mname {
+  position: absolute; left: 50%; top: calc(100% + 14px); transform: translate(-50%, -4px);
+  white-space: nowrap; font-size: 13px; letter-spacing: .02em; color: var(--ink);
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .28s ease;
+}
+.model-card:hover .mname, .model-card:focus-visible .mname { opacity: 1; transform: translate(-50%, 0); }
+.model-card:hover::after, .model-card:focus-visible::after { opacity: 0; }
+body.night .carousel { opacity: .45; transition: opacity .6s; }
+body.focus .carousel { display: none; }
 .mname { font-family: var(--serif); font-size: 16px; font-weight: 500; }
-.mref { font-size: 11px; color: var(--ink-3); letter-spacing: .08em; }
 
 .eyebrow {
   margin: 0; font-size: 11px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: var(--gold-hi);
@@ -249,7 +266,7 @@ kbd {
 .panel { transition: opacity .3s ease; }
 body.panel-collapsed .layout { grid-template-columns: minmax(0, 1fr) 0px; gap: 0; }
 body.panel-collapsed .panel { opacity: 0; visibility: hidden; overflow: hidden; }
-body.panel-collapsed .watch-svg { height: min(calc(100vh - 110px), calc(100vw - 56px)); }
+body.panel-collapsed .watch-svg { height: min(calc(100vh - 220px), calc(100vw - 56px)); }
 @media (min-width: 981px) { .panel > * { min-width: 380px; } }
 
 /* focus mode hides everything but the watch */
@@ -267,4 +284,19 @@ body.focus .watch-svg { height: 88vh; }
   .watch-svg { height: auto; width: min(100%, 520px); max-height: 70vh; }
   .topbar { padding: 14px 16px; }
   .model-head h1 { font-size: 32px; }
+}
+
+/* model switch transition */
+@keyframes watch-in {
+  from { opacity: 0; transform: scale(1.05); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+.watch-svg.entering { animation: watch-in .6s cubic-bezier(.2, .8, .2, 1); }
+.watch-svg.leaving {
+  opacity: 0; transform: scale(.94); filter: blur(3px);
+  transition: opacity .24s ease, transform .24s ease, filter .24s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .watch-svg.entering { animation: none; }
+  .model-card img, .model-card .mname { transition: none; }
 }

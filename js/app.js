@@ -82,7 +82,25 @@
   }
 
   /* ---------- render ---------- */
-  function render() {
+  // Switching models fades the old watch out, then brings the new one in with
+  // its hands sweeping from 12 to the current time. The two never overlap, since
+  // both SVGs use the same gradient ids.
+  const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const OUT_MS = 240, HANDS_MS = 1100;
+  let swapTimer = 0, introStart = 0;
+
+  function render(animate) {
+    const old = $('svg', els.stage);
+    clearTimeout(swapTimer);
+    if (animate && old && !reduceMotion) {
+      old.classList.add('leaving');
+      swapTimer = setTimeout(() => draw(true), OUT_MS);
+    } else {
+      draw(false);
+    }
+  }
+
+  function draw(intro) {
     const m = state.model;
     els.stage.innerHTML = R.build(m, state.variant);
     els.stage.dataset.model = m.id;
@@ -100,6 +118,7 @@
       (refs.hands[k] = refs.hands[k] || []).push(el);
     });
     state.lastDateKey = '';
+    if (intro) { svg.classList.add('entering'); introStart = performance.now(); }
     applyBezel();
     wireWatch(svg);
     renderPanel();
@@ -110,6 +129,11 @@
   function setHand(key, deg) {
     const list = refs.hands[key];
     if (!list) return;
+    if (introStart) {
+      const p = Math.min(1, (performance.now() - introStart) / HANDS_MS);
+      if (p >= 1) introStart = 0;
+      else deg *= 1 - Math.pow(1 - p, 3); // ease out
+    }
     for (const el of list) {
       const cx = el.dataset.cx, cy = el.dataset.cy;
       el.setAttribute('transform', (cx !== undefined ? `translate(${cx} ${cy}) ` : '') + `rotate(${deg.toFixed(3)})`);
@@ -304,9 +328,10 @@
   /* ---------- events ---------- */
   function selectModel(id, variantId) {
     const m = MODELS.find((x) => x.id === id) || MODELS[0];
+    const changed = m !== state.model;
     state.model = m;
     state.variant = m.variants.find((v) => v.id === (variantId || state.chosen[m.id])) || m.variants[0];
-    render();
+    render(changed);
   }
 
   /* ---------- model carousel ---------- */
@@ -344,8 +369,7 @@
   function buildCarousel() {
     els.models.innerHTML = MODELS.map((x) =>
       `<button class="model-card" data-id="${x.id}" aria-pressed="false" aria-label="${x.name}">
-        <span class="thumb"><img alt="" width="104" height="104" decoding="async"></span>
-        <span class="mname">${x.name}</span><span class="mref">${x.ref.replace('Ref. ', '')}</span></button>`).join('');
+        <img alt="" width="64" height="64" decoding="async"><span class="mname" aria-hidden="true">${x.name}</span></button>`).join('');
   }
 
   function updateCarousel() {
@@ -362,8 +386,10 @@
     });
     // keep the active card in view without scrolling the page itself
     if (active) {
-      const t = els.models, left = active.offsetLeft - t.offsetLeft, right = left + active.offsetWidth;
-      if (left < t.scrollLeft || right > t.scrollLeft + t.clientWidth) t.scrollTo({ left: left - 8, behavior: 'smooth' });
+      const t = els.models;
+      const left = active.getBoundingClientRect().left - t.getBoundingClientRect().left + t.scrollLeft;
+      const right = left + active.offsetWidth;
+      if (left < t.scrollLeft || right > t.scrollLeft + t.clientWidth) t.scrollTo({ left: left - 24, behavior: 'smooth' });
     }
     updateArrows();
   }
@@ -372,10 +398,13 @@
     const t = els.models;
     document.querySelector('.arrow[data-dir="-1"]').disabled = t.scrollLeft <= 2;
     document.querySelector('.arrow[data-dir="1"]').disabled = t.scrollLeft + t.clientWidth >= t.scrollWidth - 2;
+    // arrows only appear when the row is wider than the space for it
+    t.parentNode.classList.toggle('overflowing', t.scrollWidth > t.clientWidth + 2);
   }
 
   buildCarousel();
   els.models.addEventListener('scroll', updateArrows, { passive: true });
+  window.addEventListener('resize', updateArrows);
   document.querySelectorAll('.carousel .arrow').forEach((a) => a.addEventListener('click', () => {
     els.models.scrollBy({ left: +a.dataset.dir * els.models.clientWidth * 0.8, behavior: 'smooth' });
   }));
@@ -447,7 +476,7 @@
     const [id, v] = location.hash.replace('#', '').split('/');
     if (id) { const m = MODELS.find((x) => x.id === id); if (m) { state.model = m; state.variant = m.variants.find((x) => x.id === v) || m.variants[0]; } }
   }
-  window.addEventListener('hashchange', () => { fromHash(); render(); });
+  window.addEventListener('hashchange', () => { const prev = state.model; fromHash(); render(state.model !== prev); });
 
 
   // header crown mark
