@@ -36,7 +36,7 @@ It also works as-is on GitHub Pages (Settings > Pages > deploy from the `main` b
 
 ## Details
 
-- Pick a model from the row of mini watch faces under the watch. Hover one to enlarge it and see its name. Each mini face shows the dial you last chose for that model.
+- Pick a model from the dock of mini watch faces under the watch. Hover one to enlarge it and see its name. The dock slides away when the mouse is still and comes back when you move it. Each mini face shows the dial you last chose for that model.
 - Switching models fades the old watch out and the new one in, with its hands sweeping round to the current time.
 - The seconds hand sweeps smoothly in real time.
 - The date flips at local midnight under a Cyclops lens. The Day-Date spells out the day in the arc at 12.

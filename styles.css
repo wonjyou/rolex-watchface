@@ -107,10 +107,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
   display: flex; flex-direction: column; align-items: center;
   min-height: calc(100vh - 80px);
   justify-content: center;
+  padding-bottom: 64px;   /* band for the model dock */
+  overflow: hidden;       /* the hidden dock slides out of view, not into page scroll */
 }
 .watch { width: 100%; display: flex; justify-content: center; }
 .watch-svg {
-  height: min(calc(100vh - 220px), 740px);
+  height: min(calc(100vh - 190px), 740px);
   width: auto;
   transition: height .45s ease;
   max-width: 100%;
@@ -161,19 +163,30 @@ body.night .watch-svg .glare { opacity: .3; }
   padding: 4px 0 28px;
   display: flex; flex-direction: column; gap: 26px;
 }
-/* model carousel: mini watch faces under the main watch */
-.carousel { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; max-width: 760px; margin-top: 4px; }
+/* model dock: a floating rounded bar of mini watch faces that hides when idle */
+.carousel {
+  position: absolute; left: 50%; bottom: 16px; z-index: 5;
+  display: flex; align-items: center; gap: 2px;
+  max-width: calc(100% - 24px); padding: 0 6px;
+  background: rgba(18, 22, 20, .72);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2); backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, .1); border-radius: 22px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, .45);
+  transform: translateX(-50%);
+  transition: transform .55s cubic-bezier(.2, .8, .2, 1), opacity .45s ease;
+}
+.carousel.dock-hidden { transform: translate(-50%, calc(100% + 32px)); opacity: 0; pointer-events: none; }
 .arrow {
-  flex: none; width: 30px; height: 30px; border-radius: 50%; display: none; place-items: center;
-  background: rgba(255, 255, 255, .04); border: 1px solid var(--line); transition: background .2s, opacity .2s;
+  flex: none; width: 26px; height: 26px; border-radius: 50%; display: none; place-items: center;
+  background: rgba(255, 255, 255, .05); border: 1px solid var(--line); transition: background .2s, opacity .2s;
 }
 .carousel.overflowing .arrow { display: grid; }
-.arrow:hover:not(:disabled) { background: rgba(255, 255, 255, .1); }
+.arrow:hover:not(:disabled) { background: rgba(255, 255, 255, .12); }
 .arrow:disabled { opacity: .3; cursor: default; }
 .carousel-track {
   display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x proximity; min-width: 0;
   /* room above for the enlarged face and below for its name */
-  padding: 22px 34px 30px; scrollbar-width: none; overscroll-behavior-x: contain;
+  padding: 22px 24px 26px; scrollbar-width: none; overscroll-behavior-x: contain;
 }
 .carousel-track::-webkit-scrollbar { display: none; }
 .carousel-track > :first-child { margin-left: auto; }
@@ -183,28 +196,29 @@ body.night .watch-svg .glare { opacity: .3; }
   background: none; border: 0; padding: 0; border-radius: 50%;
 }
 .model-card img {
-  width: 64px; height: 64px; display: block;
-  filter: drop-shadow(0 5px 8px rgba(0, 0, 0, .55));
-  transform-origin: 50% 70%; transition: transform .28s cubic-bezier(.2, .8, .2, 1), opacity .2s;
-  opacity: .78;
+  width: 40px; height: 40px; display: block;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, .55));
+  transform-origin: 50% 100%; opacity: .75;
+  transition: transform .7s cubic-bezier(.45, 0, .25, 1), opacity .5s ease;
 }
-.model-card:hover img, .model-card:focus-visible img { transform: scale(1.38); opacity: 1; }
+.model-card:hover img, .model-card:focus-visible img { transform: scale(1.5); opacity: 1; }
 .model-card.active img { opacity: 1; }
 .model-card:focus-visible { outline: none; }
 /* gold dot marks the watch on display */
 .model-card::after {
-  content: ''; position: absolute; left: 50%; bottom: -9px; width: 4px; height: 4px; margin-left: -2px;
-  border-radius: 50%; background: var(--gold-hi); opacity: 0; transition: opacity .2s;
+  content: ''; position: absolute; left: 50%; bottom: -8px; width: 4px; height: 4px; margin-left: -2px;
+  border-radius: 50%; background: var(--gold-hi); opacity: 0; transition: opacity .3s;
 }
 .model-card.active::after { opacity: 1; }
 .model-card .mname {
-  position: absolute; left: 50%; top: calc(100% + 14px); transform: translate(-50%, -4px);
-  white-space: nowrap; font-size: 13px; letter-spacing: .02em; color: var(--ink);
-  opacity: 0; pointer-events: none; transition: opacity .2s, transform .28s ease;
+  position: absolute; left: 50%; top: calc(100% + 5px); transform: translate(-50%, -3px);
+  white-space: nowrap; font-size: 11.5px; letter-spacing: .03em; color: var(--ink);
+  opacity: 0; pointer-events: none; transition: opacity .4s ease .1s, transform .5s ease .1s;
 }
 .model-card:hover .mname, .model-card:focus-visible .mname { opacity: 1; transform: translate(-50%, 0); }
 .model-card:hover::after, .model-card:focus-visible::after { opacity: 0; }
-body.night .carousel { opacity: .45; transition: opacity .6s; }
+body.night .carousel { opacity: .5; }
+body.night .carousel.dock-hidden { opacity: 0; }
 body.focus .carousel { display: none; }
 .mname { font-family: var(--serif); font-size: 16px; font-weight: 500; }
 
@@ -266,7 +280,7 @@ kbd {
 .panel { transition: opacity .3s ease; }
 body.panel-collapsed .layout { grid-template-columns: minmax(0, 1fr) 0px; gap: 0; }
 body.panel-collapsed .panel { opacity: 0; visibility: hidden; overflow: hidden; }
-body.panel-collapsed .watch-svg { height: min(calc(100vh - 220px), calc(100vw - 56px)); }
+body.panel-collapsed .watch-svg { height: min(calc(100vh - 170px), calc(100vw - 56px)); }
 @media (min-width: 981px) { .panel > * { min-width: 380px; } }
 
 /* focus mode hides everything but the watch */
@@ -277,7 +291,7 @@ body.focus .watch-svg { height: 88vh; }
 /* ---------- responsive ---------- */
 @media (max-width: 980px) {
   .layout { grid-template-columns: 1fr; padding: 0 16px; }
-  .stage { position: static; min-height: 0; }
+  .stage { position: relative; min-height: 0; }
   body.panel-collapsed .panel { display: none; }
   body.panel-collapsed .stage { min-height: calc(100vh - 90px); }
   body.panel-collapsed .watch-svg { width: 100%; max-width: none; max-height: none; height: auto; }
@@ -299,4 +313,6 @@ body.focus .watch-svg { height: 88vh; }
 @media (prefers-reduced-motion: reduce) {
   .watch-svg.entering { animation: none; }
   .model-card img, .model-card .mname { transition: none; }
+  .carousel { transition: opacity .3s ease; }
+  .carousel.dock-hidden { transform: translateX(-50%); }
 }

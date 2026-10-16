@@ -408,6 +408,28 @@
   document.querySelectorAll('.carousel .arrow').forEach((a) => a.addEventListener('click', () => {
     els.models.scrollBy({ left: +a.dataset.dir * els.models.clientWidth * 0.8, behavior: 'smooth' });
   }));
+  /* ---------- dock auto-hide ---------- */
+  // The dock slides away after a pause in pointer activity and comes back on
+  // any movement over the watch area. It never hides while in use.
+  const dock = $('.carousel'), stageEl = $('.stage');
+  const DOCK_IDLE_MS = 2500;
+  let dockTimer = 0, overDock = false;
+  function showDock() {
+    dock.classList.remove('dock-hidden');
+    clearTimeout(dockTimer);
+    dockTimer = setTimeout(hideDock, DOCK_IDLE_MS);
+  }
+  function hideDock() {
+    if (overDock || dock.contains(document.activeElement)) { dockTimer = setTimeout(hideDock, DOCK_IDLE_MS); return; }
+    dock.classList.add('dock-hidden');
+  }
+  stageEl.addEventListener('pointermove', showDock);
+  stageEl.addEventListener('pointerdown', showDock);
+  dock.addEventListener('pointerenter', () => { overDock = true; showDock(); });
+  dock.addEventListener('pointerleave', () => { overDock = false; showDock(); });
+  dock.addEventListener('focusin', showDock);
+  showDock();
+
   els.models.addEventListener('click', (e) => {
     const b = e.target.closest('.model-card');
     if (b) selectModel(b.dataset.id);
@@ -460,8 +482,8 @@
     if (e.key === 'Escape' && !document.fullscreenElement) document.body.classList.remove('focus');
     if (e.target.matches('input, select, textarea')) return;
     const i = MODELS.indexOf(state.model);
-    if (e.key === 'ArrowRight') selectModel(MODELS[(i + 1) % MODELS.length].id);
-    else if (e.key === 'ArrowLeft') selectModel(MODELS[(i - 1 + MODELS.length) % MODELS.length].id);
+    if (e.key === 'ArrowRight') { selectModel(MODELS[(i + 1) % MODELS.length].id); showDock(); }
+    else if (e.key === 'ArrowLeft') { selectModel(MODELS[(i - 1 + MODELS.length) % MODELS.length].id); showDock(); }
     else if (e.key.toLowerCase() === 'l') setNight(!state.night);
     else if (e.key.toLowerCase() === 'f') els.fsBtn.click();
     else if (e.key.toLowerCase() === 'p') els.panelBtn.click();
