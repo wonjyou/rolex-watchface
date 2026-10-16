@@ -219,7 +219,59 @@
     return (Math.atan2(p.x, -p.y) * 180) / Math.PI;
   }
 
+  /* ---------- crown ---------- */
+  // Dragging over the crown turns it about its axis: the pointer moves the
+  // surface, so the ridges roll with it. A click gives it a short turn.
+  function wireCrown(svg, crown) {
+    const knurlEl = $('.crown-knurl', crown), d = knurlEl.dataset;
+    const radius = +d.r, flutes = +d.flutes, pitch = 180 / flutes;
+    let phase = 0, lastY = null, moved = false, anim = 0;
+    const turn = (deg) => {
+      const before = Math.floor(phase / pitch);
+      phase += deg;
+      if (Math.floor(phase / pitch) !== before) click(0.4); // a soft tick per ridge
+      knurlEl.innerHTML = R.knurl(+d.x0, +d.x1, radius, d.metal, flutes, phase);
+    };
+    const svgY = (e) => {
+      const pt = svg.createSVGPoint();
+      pt.x = e.clientX; pt.y = e.clientY;
+      return pt.matrixTransform(svg.getScreenCTM().inverse()).y;
+    };
+    crown.addEventListener('pointerdown', (e) => {
+      crown.setPointerCapture(e.pointerId);
+      cancelAnimationFrame(anim);
+      lastY = svgY(e); moved = false;
+      svg.classList.add('turning');
+    });
+    crown.addEventListener('pointermove', (e) => {
+      if (lastY === null) return;
+      const y = svgY(e), dy = y - lastY;
+      lastY = y;
+      if (Math.abs(dy) > 0.3) moved = true;
+      turn((dy / radius) * 180 / Math.PI); // arc length to angle
+    });
+    const end = () => {
+      if (lastY === null) return;
+      lastY = null;
+      svg.classList.remove('turning');
+      if (moved) return;
+      const start = performance.now(), total = pitch * 1.5;
+      let done = 0;
+      const step = (t) => {
+        const p = Math.min(1, (t - start) / 380), eased = total * (1 - Math.pow(1 - p, 3));
+        turn(eased - done); done = eased;
+        if (p < 1) anim = requestAnimationFrame(step);
+      };
+      anim = requestAnimationFrame(step);
+    };
+    crown.addEventListener('pointerup', end);
+    crown.addEventListener('pointercancel', end);
+    crown.addEventListener('wheel', (e) => { e.preventDefault(); turn(-e.deltaY * 0.25); }, { passive: false });
+  }
+
   function wireWatch(svg) {
+    const crown = $('.crown', svg);
+    if (crown) wireCrown(svg, crown);
     const hit = $('.bezel-hit', svg);
     if (hit) {
       let last = null, acc = 0;

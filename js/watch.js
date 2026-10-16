@@ -104,11 +104,15 @@
   // A knurled cylinder seen side-on, axis along +x from x0 to x1, radius R.
   // Each flute is its own shaded band, so the grip reads as deep ridges and the
   // silhouette edges come out toothed, like a real screw-down crown.
-  function knurl(x0, x1, R, metal, flutes) {
+  // `phase` (degrees) turns the cylinder about its axis: ridges roll over the edges.
+  function knurl(x0, x1, R, metal, flutes, phase = 0) {
     const m = METALS[metal];
+    const pitch = 180 / flutes, off = ((phase % pitch) + pitch) % pitch;
     let s = `<rect x="${x0}" y="${r2(-R * 0.94)}" width="${r2(x1 - x0)}" height="${r2(R * 1.88)}" rx="1.5" fill="${m.deep}"/>`;
-    for (let i = 0; i < flutes; i++) {
-      const t0 = -90 + (i * 180) / flutes, t1 = t0 + 180 / flutes, tm = (t0 + t1) / 2;
+    for (let i = -1; i < flutes; i++) {
+      // clip each flute to the visible front half of the cylinder
+      const t0 = Math.max(-90, -90 + i * pitch + off), t1 = Math.min(90, -90 + (i + 1) * pitch + off), tm = (t0 + t1) / 2;
+      if (t1 - t0 < pitch * 0.12) continue;
       const y0 = R * Math.sin(rad(t0)), y1 = R * Math.sin(rad(t1));
       const ya = y0 + (y1 - y0) * 0.18, yb = y1 - (y1 - y0) * 0.18, hgt = yb - ya;
       const rx = r2(Math.min(1.4, hgt / 2)), w = r2(x1 - x0);
@@ -143,9 +147,12 @@
     const x0 = faceted ? 229 : guards ? 221 : 207, len = guards ? 28 : 24;
     s += smoothCyl(x0 - (guards ? 3 : 12), x0 + 1, R * 0.5, metal, 1); // tube into the case
     s += smoothCyl(x0, x0 + 4, R * 0.9, metal, 1.5);                // collar
-    s += knurl(x0 + 3, x0 + len, R, metal, guards ? 7 : 9);         // fluted grip
+    const flutes = guards ? 7 : 9;
+    // fluted grip; the app redraws it with a new phase when the crown is turned
+    s += `<g class="crown-knurl" data-x0="${x0 + 3}" data-x1="${x0 + len}" data-r="${R}" data-metal="${metal}" data-flutes="${flutes}">${knurl(x0 + 3, x0 + len, R, metal, flutes)}</g>`;
     s += `<rect x="${x0 + len - 1}" y="${r2(-R * 0.8)}" width="6" height="${r2(R * 1.6)}" rx="3" fill="url(#${metal}-v)" stroke="${m.deep}" stroke-width=".8"/>`; // domed end
-    return s;
+    s += `<rect class="crown-hit" x="${x0}" y="${-R - 4}" width="${len + 10}" height="${2 * R + 8}" fill="transparent"/>`;
+    return `<g class="crown">${s}</g>`;
   }
 
   // Daytona screw-down pushers: a knurled collar with a smaller round button.
@@ -622,7 +629,7 @@
     // 7. night: dim everything, then re-draw luminescent parts glowing
     // dim layer follows the watch silhouette so the page background is untouched
     const silhouette = (model.pushers ? pushers(caseMetal) : '') + crownAssembly(caseMetal, model.guards, model.pushers) + caseBody(caseMetal, {});
-    out += `<g class="night-dim">${silhouette.replace(/class="pusher[^"]*"/g, '')}</g>`;
+    out += `<g class="night-dim">${silhouette.replace(/class="(pusher|crown)[^"]*"/g, '')}</g>`;
     out += `<g class="lume-layer" filter="url(#lumeGlow)">`;
     out += lumeStatic.join('');
     if (lumeBezel.length) out += `<g data-bezel="1">${lumeBezel.join('')}</g>`;
@@ -642,5 +649,5 @@
     return out;
   }
 
-  global.WatchRenderer = { build, crownMark, wordmark, METALS };
+  global.WatchRenderer = { build, crownMark, wordmark, knurl, METALS };
 })(window);

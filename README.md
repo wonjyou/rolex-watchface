@@ -39,6 +39,7 @@ It also works as-is on GitHub Pages (Settings > Pages > deploy from the `main` b
 - Pick a model from the dock of mini watch faces under the watch. Hover one to enlarge it and see its name. The dock slides away when the mouse is still and comes back when you move it. Each mini face shows the dial you last chose for that model.
 - Switching models fades the old watch out and the new one in, with its hands sweeping round to the current time.
 - The seconds hand sweeps smoothly in real time.
+- Drag up or down on the crown (or scroll over it) to turn it. The ridges roll with your pointer and tick as they pass, and a click gives it a short turn.
 - The date flips at local midnight under a Cyclops lens. The Day-Date spells out the day in the arc at 12.
 - The Submariner bezel only turns anticlockwise, in 120 clicks. Drag it, scroll over it, or use the buttons. It clicks.
 - The GMT-Master II has a 24-hour hand you can set to any time zone, and a bezel that turns both ways in 48 clicks.

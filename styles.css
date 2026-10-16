@@ -140,6 +140,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .watch-svg .bezel-hit { cursor: grab; }
 .watch-svg.dragging .bezel-hit { cursor: grabbing; }
 .watch-svg .pusher { cursor: pointer; }
+.watch-svg .crown { cursor: grab; }
+.watch-svg.turning .crown { cursor: grabbing; }
 .watch-svg .pusher .pusher-btn { transition: transform .12s; }
 .watch-svg .pusher.pressed .pusher-btn { transform: translateX(-4px); }
 
